@@ -1,0 +1,61 @@
+apiVersion: apps/v1          # Chỉ định phiên bản API của Kubernetes (ở đây là apps/v1 cho Deployment)
+kind: Deployment               # Loại resource là Deployment (dùng để quản lý vòng đời của ứng dụng)
+metadata:                      # Chứa các thông tin định danh cho Deployment
+  name: identityservice        # Tên của Deployment này là 'identityservice'
+  labels:                      # Các nhãn để phân loại Deployment
+    app: identityservice       # Nhãn app có giá trị là 'identityservice'
+spec:                          # Định nghĩa cấu hình chi tiết cho Deployment
+  selector:                    # Cách Deployment tìm các Pod mà nó quản lý
+    matchLabels:               # Khớp với các Pod có chứa nhãn sau:
+      app: identityservice     # Phải có nhãn app là 'identityservice'
+  template:                   # Khuôn mẫu (mẫu thiết kế) để tạo ra các Pod
+    metadata:                 # Metadata cho Pod sẽ được tạo
+      labels:                 # Các nhãn gán cho Pod
+        app: identityservice   # Nhãn app: identityservice (phải khớp với selector ở trên)
+    spec:                     # Cấu hình chi tiết bên trong Pod
+      serviceAccountName: identityservice # Tên ServiceAccount được gán cho Pod để phân quyền (RBAC)
+      terminationGracePeriodSeconds: 5     # Thời gian chờ (giây) để Pod đóng các kết nối trước khi bị xóa hẳn
+      securityContext:        # Cấu hình bảo mật cấp độ Pod
+        runAsUser: 1000       # Chạy tiến trình với User ID là 1000 (không chạy quyền root)
+        runAsGroup: 1000      # Chạy tiến trình với Group ID là 1000
+        fsGroup: 1000         # ID nhóm cho các volume (ổ đĩa) gắn vào Pod
+        runAsNonRoot: true    # Bắt buộc ứng dụng không được chạy bằng quyền root
+      containers:             # Danh sách các container chạy trong Pod
+      - name: server          # Tên của container này là 'server'
+        securityContext:      # Cấu hình bảo mật cấp độ Container
+          allowPrivilegeEscalation: false # Không cho phép tiến trình con nâng cấp quyền hạn
+          capabilities:       # Quản lý các quyền hệ thống (Linux capabilities)
+            drop:             # Loại bỏ các quyền sau:
+              - ALL           # Loại bỏ tất cả các quyền mặc định để tăng tính bảo mật
+          privileged: false     # Không chạy container ở chế độ đặc quyền (privileged mode)
+          readOnlyRootFilesystem: true # Hệ thống tệp gốc của container là chỉ đọc (không cho ghi đè)
+        image: {import from cicd} # Placeholder cho đường dẫn ảnh (image) sẽ do CI/CD điền vào
+        ports:                # Các cổng mà container này lắng nghe
+        - containerPort: 8080 # Container lắng nghe ở cổng nội bộ 8080
+        env:                   # Các biến môi trường truyền vào ứng dụng
+        - name: PORT          # Tên biến là PORT
+          value: "8080"       # Giá trị là 8080 (ứng dụng trong container có thể dùng cổng này)
+        resources:             # Quản lý tài nguyên (CPU/RAM)
+          requests:            # Mức tài nguyên tối thiểu cần để khởi chạy
+            memory: "180Mi"    # Cần ít nhất 180 Megabytes RAM
+            cpu: "200m"        # Cần ít nhất 0.2 CPU (200 millicores)
+          limits:              # Mức tài nguyên tối đa được phép sử dụng
+            memory: "300Mi"    # Không được vượt quá 300 Megabytes RAM
+            cpu: "300m"        # Không được vượt quá 0.3 CPU (300 millicores)
+        readinessProbe:        # Kiểm tra xem ứng dụng đã sẵn sàng nhận traffic chưa
+          initialDelaySeconds: 20 # Đợi 20 giây sau khi start mới bắt đầu kiểm tra
+          periodSeconds: 15       # Cứ 15 giây kiểm tra lại một lần
+          httpGet:             # Phương thức kiểm tra qua HTTP
+            path: /actuator/health/readiness # Đường dẫn kiểm tra (Spring Boot Actuator)
+            port: 8080            # Kiểm tra cổng 8080
+        livenessProbe:         # Kiểm tra xem ứng dụng còn sống không (nếu chết K8s sẽ khởi động lại)
+          initialDelaySeconds: 20 # Đợi 20 giây mới bắt đầu kiểm tra
+          periodSeconds: 15       # Cứ 15 giây kiểm tra lại một lần
+          httpGet:             # Phương thức kiểm tra qua HTTP
+            path: /actuator/health/liveness # Đường dẫn kiểm tra trạng thái sống
+            port: 8080            # Kiểm tra cổng 8080
+
+        
+          
+        
+        

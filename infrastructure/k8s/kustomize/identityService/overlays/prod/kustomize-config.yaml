@@ -1,0 +1,17 @@
+apiVersion: apps/v1 # Phiên bản API của Kubernetes cho đối tượng Deployment (v1 là ổn định nhất)
+kind: Deployment # Loại đối tượng là Deployment (dùng để quản lý vòng đời của ứng dụng)
+metadata: # Chứa thông tin định danh của Deployment
+  name: identityservice # Tên của Deployment này là 'identityservice'
+  namespace: identity # Namespace mà Deployment này sẽ được triển khai vào
+spec: # Định nghĩa cấu hình chi tiết cho Deployment
+  template: # Khuôn mẫu (mẫu thiết kế) để tạo ra các Pod
+    spec: # Cấu hình chi tiết bên trong Pod
+      priorityClassName: business-workload # Tên của PriorityClass để gán cho Pod (để ưu tiên tài nguyên)
+      containers: # Danh sách các container chạy trong Pod
+        - name: identityservice-container # Tên của container này là 'identityservice-container'
+          resources: # Quản lý tài nguyên (CPU/RAM)
+            requests: # Mức tài nguyên tối thiểu cần để khởi chạy
+              cpu: "100m" # Cần ít nhất 0.1 CPU (100 millicores)
+              memory: "512Mi" # Cần ít nhất 512 Megabytes RAM
+            limits: # Mức tài nguyên tối đa được phép sử dụng
+              memory: "1.5Gi" # Không được vượt quá 1.5 Gigabytes RAM

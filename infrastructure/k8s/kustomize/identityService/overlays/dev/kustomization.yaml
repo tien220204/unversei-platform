@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1 # Phiên bản API của Kustomize
+kind: Kustomization                     # Loại đối tượng là Kustomization (dùng để quản lý các manifest K8s)
+
+resources:
+  - ../../base                         # Tham chiếu đến thư mục base chứa các tài nguyên gốc
+
+namespace: dev                          # Namespace mà các tài nguyên sẽ được triển khai vào
+
+patches:
+  - target:
+      kind: Deployment                  # Mục tiêu là tài nguyên loại Deployment
+      name: identityservice             # Tên của Deployment là 'identityservice'
+    patch:
+      - op: replace                     # Loại thao tác là thay thế (replace)
+        path: /spec/template/spec/containers/0/image # Đường dẫn đến trường cần thay đổi (ảnh của container đầu tiên)
+        value: {import from cicd}       # Giá trị mới sẽ được gán vào (ảnh từ CI/CD)

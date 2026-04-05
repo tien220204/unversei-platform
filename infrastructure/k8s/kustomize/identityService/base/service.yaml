@@ -1,0 +1,12 @@
+apiVersion: v1             # Phiên bản API của Kubernetes cho đối tượng Service (v1 là ổn định nhất)
+kind: Service               # Loại đối tượng là Service (dùng để tạo điểm truy cập mạng cố định cho Pods)
+metadata:                   # Chứa thông tin định danh của Service
+  name: identityservice     # Tên của Service này là 'identityservice' (các service khác sẽ gọi nó qua tên này)
+spec:                       # Định nghĩa cấu hình kỹ thuật của Service
+  type: ClusterIP           # Loại Service là ClusterIP (chỉ truy cập được từ bên trong nội bộ cluster)
+  selector:                 # Cách Service xác định các Pod nào sẽ nhận traffic
+    app: identityservice    # Gửi traffic đến các Pod có nhãn 'app: identityservice' (khớp với Deployment)
+  ports:                    # Danh sách các cổng mà Service này quản lý
+    - protocol: TCP         # Giao thức truyền tải là TCP
+      port: 8080            # Cổng ảo của Service (các service khác sẽ gọi vào dịch vụ qua cổng 8080 này)
+      targetPort: 8080      # Cổng thực tế mà ứng dụng đang lắng nghe bên trong Container (thường khớp với containerPort)

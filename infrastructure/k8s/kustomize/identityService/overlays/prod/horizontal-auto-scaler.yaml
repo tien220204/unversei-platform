@@ -1,0 +1,17 @@
+apiVersion: autoscaling/v2 # Phiên bản API của Kubernetes cho đối tượng HorizontalPodAutoscaler (v2 là ổn định nhất)
+kind: HorizontalPodAutoscaler # Loại đối tượng là HorizontalPodAutoscaler (dùng để tự động scale Pods)
+metadata: # Chứa thông tin định danh của HorizontalPodAutoscaler
+  name: identityservice-hpa # Tên của HorizontalPodAutoscaler này là 'identityservice-hpa' (sẽ được gán cho Pod)
+spec: # Định nghĩa cấu hình kỹ thuật của HorizontalPodAutoscaler
+  scaleTargetRef: # Tham chiếu đến đối tượng sẽ được scale
+    apiVersion: apps/v1 # Phiên bản API của đối tượng sẽ được scale (Deployment)
+    kind: Deployment # Loại đối tượng sẽ được scale (Deployment)
+    name: identityservice # Tên của đối tượng sẽ được scale (Deployment)
+  minReplicas: 2 # Số lượng Pod tối thiểu được phép scale
+  maxReplicas: 4 # Số lượng Pod tối đa được phép scale
+  behavior: # Hành vi của HorizontalPodAutoscaler
+    scaleUp: { stabilizationWindowSeconds: 60, policies: [ {type: Percent, value: 100, periodSeconds: 60} ] } # Hành vi scale up
+    scaleDown: { stabilizationWindowSeconds: 300, policies: [ {type: Percent, value: 30, periodSeconds: 300} ] } # Hành vi scale down
+  metrics: # Các metric để scale
+    - type: Resource # Loại metric là Resource
+      resource: { name: cpu, target: { type: Utilization, averageUtilization: 60 } }

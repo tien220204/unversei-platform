@@ -1,0 +1,7 @@
+apiVersion: kustomize.config.k8s.io/v1beta1 # Phiên bản API của Kustomize
+kind: Kustomization                     # Loại đối tượng là Kustomization (dùng để quản lý các manifest K8s)
+
+resources:                              # Danh sách các tệp tài nguyên (manifests) sẽ được gộp vào
+  - deployment.yaml                     # Tham chiếu đến file cấu hình Deployment trong thư mục base
+  - service.yaml                        # Tham chiếu đến file cấu hình Service trong thư mục base
+  - serviceAccount.yaml                 # Tham chiếu đến file cấu hình ServiceAccount trong thư mục base
