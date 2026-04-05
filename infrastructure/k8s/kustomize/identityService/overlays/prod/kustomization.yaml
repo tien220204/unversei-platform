@@ -3,6 +3,7 @@ kind: Kustomization                     # Loại đối tượng là Kustomizati
 
 resources:
   - ../../base                         # Tham chiếu đến thư mục base chứa các tài nguyên gốc
+  - horizontal-auto-scaler.yaml
 
 namespace: prod                         # Namespace mà các tài nguyên sẽ được triển khai vào
 
@@ -14,3 +15,8 @@ patches:
       - op: replace                     # Loại thao tác là thay thế (replace)
         path: /spec/template/spec/containers/0/image # Đường dẫn đến trường cần thay đổi (ảnh của container đầu tiên)
         value: {import from cicd}       # Giá trị mới sẽ được gán vào (ảnh từ CI/CD)
+
+  - path: kustomize-config.yaml
+    target:
+      kind: Deployment
+      name: identityservice
